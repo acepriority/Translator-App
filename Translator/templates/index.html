@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <title>Translator App</title>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="from-container">
+            <div class="dropdown">
+                <div class="select">
+                    <span class="selected">From</span>
+                    <div class="caret"></div>
+                </div>
+                <ul class="menu"></ul>
+            </div>
+            <textarea id="input-text" class="textarea" placeholder="Enter text to translate"></textarea>
+            <button class="button" type="button" onclick="translate_text()">Translate</button>
+        </div>
+
+        <div class="to-container">
+            <div class="dropdown">
+                <div class="select">
+                    <span class="selected">To</span>
+                    <div class="caret"></div>
+                </div>
+                <ul class="menu"></ul>
+            </div>
+            <textarea id="output-text" class="textarea" placeholder="Translation will appear here" readonly></textarea>
+        </div>
+        
+    </div>
+
+    <script>
+        function translate_text() {
+            const inputText = document.getElementById('input-text').value;
+            const fromLanguageName = document.querySelector('.from-container .selected').textContent.trim();
+            const toLanguageName = document.querySelector('.to-container .selected').textContent.trim();
+            
+            const fromLanguageCode = Object.keys(languages).find(key => languages[key] === fromLanguageName);
+            const toLanguageCode = Object.keys(languages).find(key => languages[key] === toLanguageName);
+        
+            fetch(`/translate/?text=${encodeURIComponent(inputText)}&source_lang=${encodeURIComponent(fromLanguageCode)}&target_lang=${encodeURIComponent(toLanguageCode)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Translation failed.');
+                }
+                return response.json();
+            })
+            .then(result => {
+                document.getElementById('output-text').value = result.translated_text;
+            })
+            .catch(error => {
+                console.error('Translation error:', error);
+                alert('Translation failed. Please try again later.');
+            });
+        }
+    </script>
+
+    <script src="{% static 'dropdownmenu.js' %}"></script>
+</body>
+</html>
